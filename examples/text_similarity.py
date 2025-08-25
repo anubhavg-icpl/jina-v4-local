@@ -6,16 +6,13 @@ This example demonstrates how to use Jina Embeddings v4 for:
 - Text embedding generation
 - Semantic similarity search
 - Document ranking
-
-Author: Claude
-Date: 2025
 """
 
 import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from hello_world import JinaEmbeddingsV4
+from jina_embeddings import JinaEmbeddings
 import numpy as np
 
 
@@ -26,7 +23,8 @@ def text_similarity_demo():
     print("=" * 50)
     
     # Initialize model
-    jina = JinaEmbeddingsV4()
+    print("Loading Jina Embeddings v4...")
+    jina = JinaEmbeddings()
     
     # Sample documents
     documents = [

@@ -6,16 +6,14 @@ This example demonstrates how to use Jina Embeddings v4 for:
 - Cross-modal search (text queries on image databases)
 - Image-to-image similarity
 - Text-to-image matching
-
-Author: Claude  
-Date: 2025
 """
 
 import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from hello_world import JinaEmbeddingsV4
+from jina_embeddings import JinaEmbeddings
+from jina_embeddings.utils.image import ImageProcessor
 import numpy as np
 from PIL import Image, ImageDraw
 import matplotlib.pyplot as plt
@@ -63,7 +61,7 @@ def multimodal_search_demo():
     print("=" * 55)
     
     # Initialize model
-    jina = JinaEmbeddingsV4()
+    jina = JinaEmbeddings()
     
     # Create sample images
     image_paths = create_sample_images()
