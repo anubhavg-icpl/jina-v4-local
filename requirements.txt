@@ -6,7 +6,8 @@ torchvision
 pillow
 
 # Optional but recommended for better performance
-flash-attention>=2.0.0
+# Note: flash-attention may not be available for all platforms
+# Uncomment if available: flash-attention>=2.0.0
 
 # For easier embedding interfaces
 sentence-transformers
