@@ -104,3 +104,5 @@ Desktop.ini
 # Activation scripts (these are generated)
 activate.sh
 activate.bat
+.hive-mind/*
+.claude-flow/*

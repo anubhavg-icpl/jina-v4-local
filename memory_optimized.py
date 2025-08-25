@@ -65,8 +65,7 @@ class JinaV4MemoryOptimized:
                 task="retrieval",
                 prompt_name="query", 
                 batch_size=batch_size,
-                return_numpy=True,
-                show_progress_bar=True
+                return_numpy=True
             )
             
             print(f"✅ Generated text embeddings: {embeddings.shape}")
@@ -106,8 +105,7 @@ class JinaV4MemoryOptimized:
                     images=valid_images,
                     task="retrieval",
                     batch_size=batch_size,
-                    return_numpy=True,
-                    show_progress_bar=True
+                    return_numpy=True
                 )
             
             print(f"✅ Generated image embeddings: {embeddings.shape}")
