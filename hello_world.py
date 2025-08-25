@@ -24,31 +24,42 @@ import time
 class JinaEmbeddingsV4:
     """Wrapper class for Jina Embeddings v4 model"""
     
-    def __init__(self, model_name: str = "jinaai/jina-embeddings-v4", offline: bool = False):
+    def __init__(self, model_name: str = "jinaai/jina-embeddings-v4", offline: bool = False, use_mps_for_images: bool = False):
         """Initialize the Jina Embeddings v4 model
         
         Args:
             model_name: HuggingFace model identifier or local path
             offline: If True, only use locally cached model (no internet required)
+            use_mps_for_images: If True, use MPS for image encoding (may cause issues)
         """
         print("🚀 Loading Jina Embeddings v4...")
         if offline:
             print("📦 Running in offline mode (using cached model)")
         
-        # Load model
+        # For images, MPS can have autocast issues, so we may need CPU
+        self.use_mps_for_images = use_mps_for_images
+        
+        # Load model with appropriate dtype
+        # Use float32 for better compatibility with MPS
         self.model = AutoModel.from_pretrained(
             model_name,
             trust_remote_code=True,
-            torch_dtype=torch.float16,  # Use float16 for efficiency
+            torch_dtype=torch.float32,  # Use float32 for MPS compatibility
             local_files_only=offline  # Use cached model if offline=True
         )
         
         # Set device (MPS for Apple Silicon, CPU otherwise)
-        if torch.backends.mps.is_available():
+        if torch.backends.mps.is_available() and not use_mps_for_images:
             self.device = "mps"
-            print("🍎 Using Apple Silicon GPU (MPS)")
+            self.image_device = "cpu"  # Use CPU for images to avoid autocast issues
+            print("🍎 Using Apple Silicon GPU (MPS) for text, CPU for images")
+        elif torch.backends.mps.is_available():
+            self.device = "mps"
+            self.image_device = "mps"
+            print("🍎 Using Apple Silicon GPU (MPS) for all operations")
         else:
             self.device = "cpu"
+            self.image_device = "cpu"
             print("💻 Using CPU")
             
         self.model.to(self.device)
@@ -87,12 +98,28 @@ class JinaEmbeddingsV4:
             return np.array([])
             
         print(f"🖼️  Encoding {len(valid_paths)} image(s)...")
-        embeddings = self.model.encode_image(
-            images=valid_paths,
-            task=task,
-            return_numpy=True
-        )
-        print(f"✅ Generated embeddings with shape: {embeddings.shape}")
+        
+        # Move model to appropriate device for images
+        original_device = next(self.model.parameters()).device
+        if str(original_device) == "mps:0" and self.image_device == "cpu":
+            print("   📱 Moving model to CPU for image encoding (MPS compatibility)...")
+            self.model.to("cpu")
+        
+        try:
+            # Disable autocast for MPS to avoid the floating point issue
+            with torch.autocast(device_type="cpu" if self.image_device == "cpu" else self.device, enabled=False):
+                embeddings = self.model.encode_image(
+                    images=valid_paths,
+                    task=task,
+                    return_numpy=True
+                )
+            print(f"✅ Generated embeddings with shape: {embeddings.shape}")
+            
+        finally:
+            # Move model back to original device if needed
+            if str(original_device) == "mps:0" and self.image_device == "cpu":
+                self.model.to(original_device)
+                
         return embeddings
     
     @staticmethod
