@@ -1,0 +1,24 @@
+# Core dependencies for Jina Embeddings v4
+transformers>=4.52.0
+torch>=2.6.0
+peft>=0.15.2
+torchvision
+pillow
+
+# Optional but recommended for better performance
+flash-attention>=2.0.0
+
+# For easier embedding interfaces
+sentence-transformers
+
+# Development and utility dependencies
+numpy
+scipy
+matplotlib
+seaborn
+jupyter
+ipykernel
+
+# For API server example (optional)
+fastapi
+uvicorn
