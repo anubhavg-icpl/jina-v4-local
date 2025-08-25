@@ -24,15 +24,23 @@ import time
 class JinaEmbeddingsV4:
     """Wrapper class for Jina Embeddings v4 model"""
     
-    def __init__(self, model_name: str = "jinaai/jina-embeddings-v4"):
-        """Initialize the Jina Embeddings v4 model"""
+    def __init__(self, model_name: str = "jinaai/jina-embeddings-v4", offline: bool = False):
+        """Initialize the Jina Embeddings v4 model
+        
+        Args:
+            model_name: HuggingFace model identifier or local path
+            offline: If True, only use locally cached model (no internet required)
+        """
         print("🚀 Loading Jina Embeddings v4...")
+        if offline:
+            print("📦 Running in offline mode (using cached model)")
         
         # Load model
         self.model = AutoModel.from_pretrained(
             model_name,
             trust_remote_code=True,
-            torch_dtype=torch.float16  # Use float16 for efficiency
+            torch_dtype=torch.float16,  # Use float16 for efficiency
+            local_files_only=offline  # Use cached model if offline=True
         )
         
         # Set device (MPS for Apple Silicon, CPU otherwise)
